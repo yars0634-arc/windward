@@ -1,7 +1,7 @@
 """WINDWARD step 1: download hourly wind speed for each site from Open-Meteo.
 
-Run:  python data/fetch_wind.py
-Output: data/raw/<site_id>.csv with columns: time, wind_speed, variable
+Run:  python fetch_wind.py
+Output: raw/<site_id>.csv with columns: time, wind_speed, variable
 
 Uses the free Open-Meteo historical archive API (no key needed).
 Wind speed is in m/s, times are local Kenyan time (Africa/Nairobi).
@@ -71,7 +71,7 @@ def main():
               f"(mean {df['wind_speed'].mean():.1f} m/s) -> {path.name}")
         time.sleep(PAUSE_BETWEEN_REQUESTS_S)
 
-    print("Done. Next: python data/train_model.py")
+    print("Done. Next: python train_model.py")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent
 RAW_DIR = DATA_DIR / "raw"                      # one CSV per site goes here
-GAME_DATA_DIR = DATA_DIR.parent / "game" / "data"  # forecasts.json + sites.json
+GAME_DATA_DIR = DATA_DIR                      # forecasts.json + sites.json (same folder as the game)
 
 SITES = [
     {"id": "north_shore",  "name": "North Shore",  "lat": 3.00, "lon": 36.55},

@@ -1,7 +1,7 @@
 """WINDWARD step 2: train the wind forecast model and export JSON for the game.
 
-Run:  python data/train_model.py      (after fetch_wind.py)
-Output: game/data/forecasts.json and game/data/sites.json
+Run:  python train_model.py      (after fetch_wind.py)
+Output: forecasts.json and sites.json (next to this script)
 
 For each site we train one Ridge regression that looks at the last 72 hours
 of wind and predicts the next 24 hours. We compare it to a naive
@@ -165,7 +165,7 @@ def main():
     for site in SITES:
         path = RAW_DIR / f"{site['id']}.csv"
         if not path.exists():
-            raise SystemExit(f"Missing {path}. Run: python data/fetch_wind.py")
+            raise SystemExit(f"Missing {path}. Run: python fetch_wind.py")
         series_by_site[site["id"]] = load_series(path)
     print("Training on real Open-Meteo data...")
     run_pipeline(series_by_site, sample=False)

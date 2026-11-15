@@ -1,6 +1,6 @@
 """Creates SAMPLE forecasts.json + sites.json from SYNTHETIC wind.
 
-Run:  python data/make_sample.py
+Run:  python make_sample.py
 This is only so the game runs before the real scripts have been run.
 Every number here is made up. train_model.py overwrites the output.
 """

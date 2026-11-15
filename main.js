@@ -20,8 +20,8 @@ let muted = false;
 // ---- Loading ----
 async function loadData() {
   const [sitesFile, forecastFile] = await Promise.all([
-    fetch('data/sites.json').then((r) => r.json()),
-    fetch('data/forecasts.json').then((r) => r.json()),
+    fetch('sites.json').then((r) => r.json()),
+    fetch('forecasts.json').then((r) => r.json()),
   ]);
   sites = sitesFile.sites;
   const { forecasts, ...meta } = forecastFile;

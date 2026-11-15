@@ -3,7 +3,7 @@
 // To use GLB models later, load them with GLTFLoader and swap them in for the
 // primitive groups made in makeVillage() / makeTree().
 
-import * as THREE from '../lib/three.module.min.js';
+import * as THREE from './three.module.min.js';
 import {
   VILLAGES, nearestVillage, MAX_TURBINES_PER_SITE, CUT_IN_MS, CUT_OUT_MS, RATED_MS,
 } from './sim.js';
