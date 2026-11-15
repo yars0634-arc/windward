@@ -1,0 +1,46 @@
+{
+ "sample": true,
+ "label": "SAMPLE - synthetic data, not real measurements",
+ "sites": [
+  {
+   "id": "north_shore",
+   "name": "North Shore",
+   "lat": 3.0,
+   "lon": 36.55,
+   "meanWind": 10.26,
+   "windVariability": 3.45
+  },
+  {
+   "id": "east_plateau",
+   "name": "East Plateau",
+   "lat": 2.9,
+   "lon": 37.0,
+   "meanWind": 7.54,
+   "windVariability": 1.53
+  },
+  {
+   "id": "central_gap",
+   "name": "Central Gap",
+   "lat": 2.75,
+   "lon": 36.8,
+   "meanWind": 8.49,
+   "windVariability": 3.76
+  },
+  {
+   "id": "south_ridge",
+   "name": "South Ridge",
+   "lat": 2.5,
+   "lon": 36.6,
+   "meanWind": 9.63,
+   "windVariability": 2.64
+  },
+  {
+   "id": "far_east",
+   "name": "Far East",
+   "lat": 2.55,
+   "lon": 36.95,
+   "meanWind": 9.08,
+   "windVariability": 2.71
+  }
+ ]
+}

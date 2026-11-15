@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WINDWARD</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #10262b; --panel: #16343a; --panel-2: #1f454c; --text: #eef5f3; --muted: #9fb4b8;
+    --accent: #ffc94d; --wind: #58c4dc; --hydro: #3d8fc4; --battery: #7ad17a; --diesel: #e08a3c;
+    --danger: #d84a3a; --ok: #49c26b; --panel-width: 350px; --hud-height: 52px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1, h2, h3, p { margin: 0 0 10px; }
+  h2 { font-size: 18px; } h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 14px; }
+  small { color: var(--muted); }
+
+  /* Layout: HUD on top, map on the left, panel on the right */
+  #hud { position: fixed; inset: 0 0 auto 0; height: var(--hud-height); display: flex; align-items: center; gap: 18px;
+    padding: 0 14px; background: var(--panel); border-bottom: 2px solid var(--panel-2); z-index: 5; white-space: nowrap; overflow-x: auto; }
+  #stage { position: fixed; top: var(--hud-height); left: 0; right: var(--panel-width); bottom: 0; }
+  #scene { width: 100%; height: 100%; display: block; }
+  #labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  #panel { position: fixed; top: var(--hud-height); right: 0; bottom: 0; width: var(--panel-width); padding: 16px;
+    background: var(--panel); overflow-y: auto; }
+
+  .hud-title { font-weight: 800; letter-spacing: .12em; color: var(--accent); }
+  .hud-item span { display: block; font-size: 10px; text-transform: uppercase; color: var(--muted); line-height: 1; }
+  .hud-item b { font-size: 14px; }
+  .hud-steps { font-size: 11px; color: var(--muted); display: flex; gap: 5px; }
+  .hud-steps .current { color: var(--bg); background: var(--accent); border-radius: 4px; padding: 0 6px; font-weight: 700; }
+
+  /* Buttons */
+  button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid transparent; border-radius: 8px;
+    padding: 9px 12px; cursor: pointer; width: 100%; margin-top: 8px; text-align: center; }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { background: var(--accent); color: #1c1a10; font-weight: 700; }
+  button.next { margin-top: 16px; }
+  button.ghost { width: auto; margin: 0 0 0 auto; padding: 4px 8px; background: none; }
+
+  /* Panel pieces */
+  .site-row { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; text-align: left; }
+  .site-row small { grid-column: 1; } .site-row em { grid-column: 2; grid-row: 2; font-style: normal; color: var(--accent); font-weight: 700; }
+  .site-row span { color: var(--muted); font-size: 12px; }
+  .selected { border-color: var(--accent) !important; background: #2a5258; }
+  .choice { text-align: left; } .choice small { display: block; }
+  .choices { display: grid; gap: 0; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  .advice { background: #20424a; border-left: 4px solid var(--wind); border-radius: 6px; padding: 10px; margin: 10px 0; }
+  .risk-box { background: var(--panel-2); border-radius: 8px; padding: 10px; margin-top: 8px; }
+  .risk-box p { margin: 8px 0 4px; }
+  .badge { display: inline-block; font-weight: 800; font-size: 12px; letter-spacing: .06em; padding: 3px 10px; border-radius: 99px; color: #111; }
+  .risk-LOW { background: var(--ok); } .risk-MEDIUM { background: var(--accent); } .risk-HIGH { background: var(--danger); color: #fff; }
+  .follow { margin: 12px 0 0; font-weight: 600; } .follow.yes { color: var(--ok); } .follow.no { color: var(--diesel); }
+  .stat { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--panel-2); }
+  .stat span { color: var(--muted); }
+  .tip { background: #3a3413; border: 1px solid var(--accent); border-radius: 8px; padding: 10px; margin-bottom: 14px; }
+  .tip b { display: block; color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+  .fact { background: #1d3d2c; border-radius: 6px; padding: 10px; margin-top: 12px; }
+  .alert { color: #ff8a7a; font-weight: 700; margin-top: 8px; }
+  .sample { color: var(--accent); font-size: 12px; border: 1px dashed var(--accent); border-radius: 6px; padding: 6px 10px; }
+
+  /* Chart + legends */
+  .chart { width: 100%; height: 150px; background: #0f2327; border-radius: 8px; display: block; }
+  .chart-title { font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  .legend { font-size: 11px; color: var(--muted); margin: 6px 0; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 8px; vertical-align: -1px; }
+  .swatch:first-child { margin-left: 0; }
+  .swatch.band { background: rgba(88,196,220,.35); } .swatch.p50, .swatch.wind, .bar.wind { background: var(--wind); }
+  .swatch.actual { background: var(--accent); } .swatch.hydro, .bar.hydro { background: var(--hydro); }
+  .swatch.battery, .bar.battery { background: var(--battery); } .swatch.diesel, .bar.diesel { background: var(--diesel); }
+  .swatch.ok { background: var(--ok); } .swatch.out { background: var(--danger); } .swatch.demand { background: #fff; width: 3px; }
+
+  /* RUN phase */
+  .clock { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .timeline { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin: 8px 0; }
+  .timeline i { height: 14px; background: var(--panel-2); border-radius: 2px; }
+  .timeline .ok { background: var(--ok); } .timeline .diesel { background: var(--diesel); } .timeline .out { background: var(--danger); }
+  .meter { position: relative; height: 26px; background: #0f2327; border-radius: 6px; overflow: hidden; }
+  #meter-bars { display: flex; height: 100%; } .bar { height: 100%; transition: width .2s; }
+  #meter-demand { position: absolute; top: 0; bottom: 0; width: 3px; background: #fff; transition: left .2s; }
+
+  /* Map labels */
+  .map-label { position: absolute; left: 0; top: 0; font-size: 11px; line-height: 1.25; text-align: center; white-space: nowrap;
+    background: rgba(16,38,43,.82); padding: 3px 7px; border-radius: 6px; will-change: transform; }
+    .site-label { margin-top: 26px; } /* sits below its tile */
+  .village-label { font-weight: 700; background: rgba(73,194,107,.9); color: #0d1f12; }
+  .village-label.off { background: var(--danger); color: #fff; }
+  .dam-label { background: rgba(61,143,196,.9); }
+  #toast { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(16,38,43,.9);
+    padding: 8px 14px; border-radius: 99px; pointer-events: none; }
+
+  /* Start + end screens */
+  #overlay { position: fixed; inset: 0; background: rgba(8,20,23,.78); display: flex; align-items: center; justify-content: center;
+    padding: 16px; z-index: 10; overflow-y: auto; }
+  [hidden] { display: none !important; }
+  .card { background: var(--panel); border-radius: 14px; padding: 26px; max-width: 620px; width: 100%; max-height: 100%; overflow-y: auto; }
+  .card h1 { font-size: 34px; letter-spacing: .14em; color: var(--accent); }
+  .tagline { font-size: 16px; font-style: italic; color: var(--wind); }
+  .how ol { margin: 0; padding-left: 20px; } .how li { margin-bottom: 4px; } .how b { color: var(--accent); }
+  .end-grid { margin-bottom: 8px; }
+  .headline { font-size: 18px; } .headline b { color: var(--accent); font-size: 22px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { text-align: right; padding: 5px 6px; border-bottom: 1px solid var(--panel-2); } th:first-child, td:first-child { text-align: left; }
+  th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .credits { margin-top: 14px; color: var(--muted); font-size: 12px; text-align: center; }
+
+  /* Small screens: panel moves to the bottom */
+  @media (max-width: 800px) {
+    #stage { right: 0; bottom: 46%; }
+    #panel { top: 54%; width: 100%; }
+    .hud-steps { display: none; }
+  }
+</style>
+</head>
+<body>
+  <header id="hud"></header>
+  <main id="stage">
+    <canvas id="scene"></canvas>
+    <div id="labels"></div>
+    <div id="toast" hidden></div>
+  </main>
+  <aside id="panel"></aside>
+  <div id="overlay" hidden></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
